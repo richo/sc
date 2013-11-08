@@ -1,0 +1,13 @@
+PATH
+  remote: .
+  specs:
+    sc (0.0.0)
+
+GEM
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  sc!

@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'sc/lexer'
+
+def usage
+  STDERR.puts <<-USAGE
+usage: sc <filename>
+USAGE
+end
+
+def main(argv)
+  case argv.length
+  when 0
+    usage
+    exit(1)
+  when 1
+    data = File.read(argv[0])
+    tokens = Lex(data)
+    puts tokens.inspect
+  else
+    usage
+    exit(1)
+  end
+end
+
+main(ARGV)
