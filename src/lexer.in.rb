@@ -14,7 +14,44 @@
   dq_string   = '"' ( [^"\\] | /\\./ )* '"';
   semicolon   = ';';
 
+  group       = '(' @{ fcall group_rest; };
+  group_rest := ([xo] | group)* ')' @{ fret; };
+
+
+  fn_name     = 'function';
+
+  get_args := |*
+    'void' {
+    puts "Getting args"
+      current_function.args = "void";
+      fret;
+    };
+  *|;
+
+  function_args := |*
+    '(' { fcall get_args; };
+    ')' { token_array << {:name => current_function.name, :barp => "barp" } };
+  *|;
+
+  #function_body := |*
+  #*|
+
+  function := |*
+    identifier {
+    puts "getting function"
+      current_function.name = getFuncName(data, ts, te)
+      fcall function_args;
+    };
+
+  *|;
+
   main := |*
+
+    fn_name {
+      new_function!;
+      fgoto function;
+    };
+
 
     integer => {
       emit(:integer_literal, data, token_array, ts, te)
@@ -65,8 +102,24 @@
 
 %% write data;
 
+class Function
+  attr_accessor :name, :args
+end
+
+def new_function!
+  @current_function = Function.new()
+end
+
+def current_function
+  @current_function
+end
+
 def emit(token_name, data, target_array, ts, te)
   target_array << {:name => token_name.to_sym, :value => data[ts...te].pack("c*") }
+end
+
+def getFuncName(data, ts, te)
+  data[ts...te].pack("c*")
 end
 
 def Lex(data)
