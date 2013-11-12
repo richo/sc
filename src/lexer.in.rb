@@ -14,12 +14,51 @@
   dq_string   = '"' ( [^"\\] | /\\./ )* '"';
   semicolon   = ';';
 
-  visibility  = ('inline' | 'public');
+  group       = '(' @{ fcall group_rest; };
+  group_rest := ([xo] | group)* ')' @{ fret; };
+
+
+  inline_fn   = 'inline' space 'fn';
+  public_fn   = 'public' space 'fn';
+
+  action oops { raise "Oops" }
+
+  fn1 := |*
+    identifier => {
+      @current_func.name = Function.get_name(data, ts, te)
+    };
+
+    obrace {
+      fgoto fn2;
+    };
+
+    space {};
+
+    any {
+      asplode(data, ts, te)
+    };
+  *|;
+
+  fn2 := |*
+    cbrace {
+
+      token_array << @current_func
+      @current_func = nil
+
+      fgoto main;
+    };
+
+    any {
+      asplode(data, ts, te)
+    };
+  *|;
 
   main := |*
 
-    visibility => {
-      emit(:visibility, data, token_array, ts, te)
+    inline_fn {
+      emit(:inline_fn, data, token_array, ts, te)
+      @current_func = Function.new(:inline)
+      fgoto fn1;
     };
 
     integer => {
@@ -69,23 +108,32 @@
 }%%
 =end
 
-class Token
-  attr_reader :type, :data
+class Function
+  attr_accessor :name, :args
+  attr_reader :type
 
-  def initialize(type, data)
+  def initialize(type)
     @type = type
-    @data = data
   end
 
-  def inspect
-    "#{type.inspect} => #{data}"
+  def self.get_name(data, ts, te)
+    data[ts...te].pack("c*")
   end
 
 end
 
-def emit(type, data, target_array, ts, te)
-  target_array << Token.new(type, data[ts...te].pack("c*"))
+def new_function!
+  @current_function = Function.new()
 end
+
+def current_function
+  @current_function
+end
+
+def emit(token_name, data, target_array, ts, te)
+  target_array << {:name => token_name.to_sym, :value => data[ts...te].pack("c*") }
+end
+
 
 class Lexer
 
@@ -93,10 +141,14 @@ class Lexer
 
 end
 
+def asplode(data, ts, te)
+  raise data[ts...te].pack("c*")
+end
 
 def Lexer.lex(data)
   data = data.unpack("c*") if(data.is_a?(String))
   eof = data.length
+  @functions = {}
   token_array = []
 
 %% write init;
