@@ -15,7 +15,7 @@ def main(argv)
     exit(1)
   when 1
     data = File.read(argv[0])
-    tokens = Lex(data)
+    tokens = Lexer.lex(data)
     puts tokens.inspect
   else
     usage

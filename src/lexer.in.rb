@@ -100,8 +100,6 @@
 }%%
 =end
 
-%% write data;
-
 class Function
   attr_accessor :name, :args
 end
@@ -122,7 +120,14 @@ def getFuncName(data, ts, te)
   data[ts...te].pack("c*")
 end
 
-def Lex(data)
+class Lexer
+
+%% write data;
+
+end
+
+
+def Lexer.lex(data)
   data = data.unpack("c*") if(data.is_a?(String))
   eof = data.length
   token_array = []
