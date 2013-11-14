@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'sc/lexer'
+require 'sc/parser'
 
 def usage
   STDERR.puts <<-USAGE
@@ -17,6 +18,9 @@ def main(argv)
     data = File.read(argv[0])
     tokens = Lexer.lex(data)
     puts tokens.inspect
+    parser = SC::Parser.new(tokens)
+    ast = parser.parse
+    puts ast.inspect
   else
     usage
     exit(1)

@@ -14,13 +14,13 @@
   dq_string   = '"' ( [^"\\] | /\\./ )* '"';
   semicolon   = ';';
 
-  visibility  = ('inline' | 'public');
+  #visibility  = ('inline' | 'public');
 
   main := |*
 
-    visibility => {
-      emit(:visibility, data, token_array, ts, te)
-    };
+    # visibility => {
+    #   emit(:visibility, data, token_array, ts, te)
+    # };
 
     integer => {
       emit(:integer_literal, data, token_array, ts, te)
